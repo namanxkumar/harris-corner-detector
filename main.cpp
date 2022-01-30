@@ -10,13 +10,35 @@ int MAX_THRESH = 255;
 string source_window("Source image");
 string corners_window("Harris Corner detection");
 
+void selfMadeHarrisCornerDetector(Mat input, Mat &output){
+    Mat src_blurred;
+    GaussianBlur(input, src_blurred, Size(7,7), 0, 0, BORDER_DEFAULT);
+    Mat x_derivative, y_derivative;
+    // First, calculate x and y derivatives
+    Sobel(input, x_derivative, CV_32FC1, 1, 0);
+    Sobel(input, y_derivative, CV_32FC1, 0, 1);
+    // Find other parameters to calculate M matrix
+    Mat x_derivative_squared, y_derivative_squared, xy_derivative;
+    multiply(x_derivative, x_derivative, x_derivative_squared);
+    multiply(y_derivative, y_derivative, y_derivative_squared);
+    multiply(x_derivative, y_derivative, xy_derivative);
+    // Compute R
+    Mat R, x2y2, xy, det, trace, trace_sq;
+    multiply(x_derivative_squared, y_derivative_squared, x2y2);
+    multiply(x_derivative, y_derivative, xy);
+    add(x_derivative_squared, y_derivative_squared, trace);
+    multiply(trace, trace, trace_sq);
+    output = (x2y2 - xy) - 0.04*trace_sq;
+};
+
 void detectCornerHarris(int,void*)
 {
     int blockSize = 2;
     int apertureSize = 3;
     double k = 0.04;
     Mat dst = Mat::zeros( src.size(), CV_32FC1 );
-    cornerHarris( src_gray, dst, blockSize, apertureSize, k );
+    selfMadeHarrisCornerDetector(src_gray, dst);
+    // cornerHarris( src_gray, dst, blockSize, apertureSize, k );
     Mat dst_norm, dst_norm_scaled;
     normalize( dst, dst_norm, 0, 255, NORM_MINMAX, CV_32FC1, Mat() );
     convertScaleAbs( dst_norm, dst_norm_scaled );

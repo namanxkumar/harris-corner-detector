@@ -1,5 +1,6 @@
 # harris corner detector
  A Basic OpenCV Implementation of the Harris Corner Detector
+ Includes a Harris Detector made from scratch using OpenCV primitives (Sobel and GaussianBlur + Matrix multiplications)
 
 ### Sample
 Here, threshold was set to 120
@@ -27,3 +28,10 @@ The basic principle of the Harris Detector is quite simple:
 - We take a small window in the image, and shift it by a tiny amount.
 - Then we calculate the amount of shift between the two sets of pixels in the original and shifted windows. For this, we use the sum squared difference (SSD).
 - The objective is to find pixels that maximize SSD.
+
+The pseudocode for the custom Harris Detector function is:
+1. Apply gaussian blur to the grayscale image
+1. Calculate the Sobel operator along x and y directions
+1. Multiply the derivative matrices to find elements of the M matrix
+1. Get determinant of the M matrix, and the square of the trace
+1. Finally, find the corners by Det(M) - k*(trace^2) where k = 0.04
